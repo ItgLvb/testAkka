@@ -4,6 +4,7 @@ sealed trait Message {
   def sourceId: Long
   def mTime:Long
   def senderId: Long
+  var isConfirmed:Boolean = false
 }
 
 @annotations.Message(id=0, singleton=true)
