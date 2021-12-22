@@ -1,5 +1,7 @@
 package com.example
 
+import akka.actor.typed.ActorRef
+
 sealed trait Message {
   def sourceId: Long
   def mTime:Long
@@ -9,6 +11,14 @@ sealed trait Message {
 
 @annotations.Message(id=0, singleton=true)
 case class DeleteMessages(
+                          sourceId:Long,
+                          mTime: Long,
+                          senderId: Long,
+                          sourceRef: ActorRef[Message]
+                        ) extends Message
+
+@annotations.Message(id=0, singleton=true)
+case class DeleteMessagesCompleted(
                           sourceId:Long,
                           mTime: Long,
                           senderId: Long
@@ -41,3 +51,12 @@ case class TestMessage2(
                         mTime: Long,
                         senderId: Long
                       ) extends Message
+
+object Message {
+
+  import AnnotationUtil._
+
+  def getMetaInfo(clazz: Class[_]): Option[annotations.Message] = {
+    clazz.annotation[annotations.Message]
+  }
+}
