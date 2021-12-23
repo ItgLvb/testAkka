@@ -1,13 +1,12 @@
 package com.example
 
-import akka.actor.PoisonPill
-import akka.actor.typed.{ActorRef, Behavior}
 import akka.actor.typed.scaladsl.{AbstractBehavior, ActorContext, Behaviors}
+import akka.actor.typed.{ActorRef, Behavior}
 
 import scala.collection.mutable
 
 
-class DispatcherBehavior(
+class DispatcherBehavior2(
                           context: ActorContext[Message],
                           router: ActorRef[Message]
                         ) extends AbstractBehavior[Message](context) {
@@ -22,7 +21,7 @@ class DispatcherBehavior(
       actor.foreach(_ ! msg)
     } else {
       actor.foreach(ref => context.stop(ref))
-      val nextWorker = context.spawn(DispatcherBehavior.WorkerBehavior(msg.sourceId, router), "dispatcher_worker")
+      val nextWorker = context.spawn(DispatcherBehavior2.WorkerBehavior(msg.sourceId, router), "dispatcher2_worker")
       actorsMap.update(msg.sourceId, nextWorker)
       nextWorker ! msg
     }
@@ -30,11 +29,11 @@ class DispatcherBehavior(
   }
 }
 
-object DispatcherBehavior {
+object DispatcherBehavior2 {
   def apply(
              router: ActorRef[Message]
            ): Behavior[Message] =
-    Behaviors.setup(ctx => new DispatcherBehavior(ctx, router))
+    Behaviors.setup(ctx => new DispatcherBehavior2(ctx, router))
 
   class WorkerBehavior(
                         context: ActorContext[Message],
@@ -43,9 +42,9 @@ object DispatcherBehavior {
                       ) extends AbstractBehavior[Message](context) {
     override def onMessage(msg: Message): Behavior[Message] =
       msg match {
-        case m: TestMessage =>
-          println(s"TestMessage ${m.mTime}")
-          router ! TestMessage2(sourceId + 1, m.mTime, sourceId)
+        case m: TestMessage2 =>
+          println(s"TestMessage2 ${m.mTime}")
+          router ! TestMessage(sourceId + 1, m.mTime, sourceId)
           Behaviors.same
       }
   }

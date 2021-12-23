@@ -28,7 +28,8 @@ case class DeleteMessagesCompleted(
 case class ResendMessage(
                           sourceId:Long,
                           mTime: Long,
-                          senderId: Long
+                          senderId: Long,
+                          types: List[Int]
                         ) extends Message
 
 @annotations.Message(id=2, singleton=false)

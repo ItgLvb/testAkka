@@ -11,7 +11,9 @@ class WriterBehavior (
     msg match {
       case m: DeleteMessages =>
         DB.removeBySenderId(m.senderId, m.mTime)
-        m.sourceRef ! DeleteMessagesCompleted(m.sourceId,m.mTime, m.senderId)
+        val completeMessage = DeleteMessagesCompleted(m.sourceId,m.mTime, m.senderId)
+        completeMessage.isConfirmed = true
+        m.sourceRef ! completeMessage
       case m if Message.getMetaInfo(m.getClass).exists(!_.singleton) =>
         DB.addMessage(msg)
         router ! msg

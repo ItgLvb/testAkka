@@ -5,6 +5,8 @@ import akka.actor.typed.scaladsl.Behaviors
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.Route
 
+import scala.concurrent.duration.DurationInt
+import scala.language.postfixOps
 import scala.util.Failure
 import scala.util.Success
 
@@ -37,8 +39,19 @@ object QuickstartApp {
 
       Behaviors.empty
     }
+    val router = Behaviors.setup[Message] { context =>
+      val routerActor = context.spawn(new RouterBehavior(context),"router")
+      context.watch(routerActor)
+      Behaviors.same
+    }
+
     val system = ActorSystem[Nothing](rootBehavior, "HelloAkkaHttpServer")
+    val system2 = ActorSystem[Message](router, "MessageServer")
     //#server-bootstrapping
+//    system2.scheduler.scheduleOnce(5 seconds, new Runnable {
+//      override def run(): Unit = {}
+//
+//    })
   }
 }
 //#main-class
